@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DETEKTIF NUTRISI: Misi Merancang Menu MBG</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            50: '#FDFBF7',
+                            100: '#F7F3EB',
+                            200: '#EFE7D8',
+                        },
+                        sage: {
+                            50: '#F2F7F3',
+                            100: '#EAF2EC',
+                            300: '#B2CEB7',
+                            500: '#7A9A7E',
+                            700: '#4A684E',
+                            800: '#2C3E35',
+                        },
+                        softYellow: '#FFF4D0',
+                        softPink: '#FBE4E8',
+                        warmDark: '#2C3E35'
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['Fredoka', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --base-font-size: 16px;
+        }
+        html {
+            font-size: var(--base-font-size);
+            scroll-behavior: smooth;
+        }
+        body {
+            background-color: #FDFBF7;
+            color: #2C3E35;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .badge-shadow {
+            box-shadow: 0 10px 25px -5px rgba(122, 154, 126, 0.2), 0 8px 10px -6px rgba(122, 154, 126, 0.1);
+        }
+        .card-hover {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
+        }
+        .plate-quadrant {
+            transition: background-color 0.2s ease;
+        }
+        .plate-quadrant.drag-over {
+            background-color: rgba(122, 154, 126, 0.25);
+            border-style: solid;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F7F3EB;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #B2CEB7;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7A9A7E;
+        }
+        /* Print Styles for PDF export */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; font-size: 12pt; }
+            .print-only { display: block !important; }
+            .page-break { page-break-before: always; }
+            .card-box { border: 1px solid #ccc !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-sage-300 selection:text-sage-800">
+
+    <!-- TOP ACCESSIBILITY TOOLBAR & PROGRESS BAR -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-sage-100 shadow-sm no-print">
+        <div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+            <!-- App Identity -->
+            <div class="flex items-center gap-2">
+                <span class="bg-sage-500 text-white p-2 rounded-xl text-lg font-bold shadow-sm">
+                    <i class="fa-solid font-bold fa-magnifying-glass"></i>
+                </span>
+                <div>
+                    <h1 class="font-display font-bold text-lg text-sage-800 leading-tight">DETEKTIF NUTRISI</h1>
+                    <p class="text-xs text-sage-500 hidden sm:block">Misi Menu MBG Beragam & Bergizi</p>
+                </div>
+            </div>
+
+            <!-- Accessibility Toolbar -->
+            <div class="flex items-center gap-1 sm:gap-2 bg-sage-50 p-1.5 rounded-2xl border border-sage-100">
+                <!-- Text To Speech Controls -->
+                <div class="flex items-center gap-1 border-r border-sage-200 pr-2 mr-1">
+                    <span class="text-xs font-semibold text-sage-700 hidden md:inline px-1"><i class="fa-solid fa-volume-high mr-1"></i> Audio:</span>
+                    <button onclick="speakPageText()" title="Dengarkan Teks Halaman" class="p-2 bg-white text-sage-700 hover:bg-sage-500 hover:text-white rounded-xl shadow-xs transition-colors text-xs font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-play"></i> <span class="hidden sm:inline">Baca</span>
+                    </button>
+                    <button onclick="pauseSpeech()" title="Jeda Suara" class="p-2 bg-white text-sage-700 hover:bg-sage-500 hover:text-white rounded-xl shadow-xs transition-colors text-xs">
+                        <i class="fa-solid fa-pause"></i>
+                    </button>
+                    <button onclick="stopSpeech()" title="Hentikan Suara" class="p-2 bg-white text-rose-600 hover:bg-rose-500 hover:text-white rounded-xl shadow-xs transition-colors text-xs">
+                        <i class="fa-solid fa-square"></i>
+                    </button>
+                </div>
+
+                <!-- Font Resizers -->
+                <div class="flex items-center gap-1">
+                    <span class="text-xs font-semibold text-sage-700 hidden md:inline px-1"><i class="fa-solid fa-font mr-1"></i> Ukuran:</span>
+                    <button onclick="changeFontSize(1)" title="Perbesar Teks" class="w-8 h-8 bg-white hover:bg-sage-500 hover:text-white rounded-xl text-xs font-bold shadow-xs transition-colors">A+</button>
+                    <button onclick="changeFontSize(-1)" title="Perkecil Teks" class="w-8 h-8 bg-white hover:bg-sage-500 hover:text-white rounded-xl text-xs font-bold shadow-xs transition-colors">A-</button>
+                    <button onclick="resetFontSize()" title="Reset Ukuran" class="px-2 h-8 bg-white hover:bg-sage-500 hover:text-white rounded-xl text-xs font-semibold shadow-xs transition-colors">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Tracker Bar -->
+        <div class="w-full bg-sage-100 h-2 relative overflow-hidden">
+            <div id="progress-bar" class="bg-sage-500 h-full transition-all duration-500 ease-out" style="width: 12.5%;"></div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-5xl mx-auto px-4 py-6 w-full flex-grow">
+
+        <!-- ========================================== -->
+        <!-- PAGE 1: BERANDA -->
+        <!-- ========================================== -->
+        <section id="page-1" class="page-section space-y-8 animate-fadeIn">
+            <div class="bg-gradient-to-br from-cream-100 via-white to-sage-50 p-6 md:p-10 rounded-3xl border border-sage-100 shadow-sm text-center relative overflow-hidden">
+                <!-- Decorative background elements -->
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-softYellow/60 rounded-full blur-2xl"></div>
+                <div class="absolute -left-10 -top-10 w-40 h-40 bg-softPink/60 rounded-full blur-2xl"></div>
+
+                <div class="inline-flex items-center gap-2 bg-softYellow text-amber-900 px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-wider mb-4 border border-amber-200">
+                    <i class="fa-solid fa-star"></i> Media Pembelajaran Interaktif IPA SMP
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-4 relative z-10">
+                    <h2 class="font-display text-3xl sm:text-5xl font-extrabold text-sage-800 leading-tight">
+                        DETEKTIF NUTRISI
+                    </h2>
+                    <p class="text-lg sm:text-xl text-sage-700 font-bold">
+                        “Misi Merancang Menu MBG yang Beragam dan Bergizi”
+                    </p>
+                    
+                    <div class="my-6 p-5 bg-white/80 rounded-2xl border border-sage-200 shadow-xs text-sage-800 text-left space-y-3 leading-relaxed">
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">🕵️‍♂️</span>
+                            <div>
+                                <h3 class="font-bold text-sage-800 text-base">Panggilan Tugas untuk para Detektif Muda!</h3>
+                                <p class="text-sm text-sage-700 mt-1">
+                                    Halo, Detektif Nutrisi! Sekolahmu sedang menyusun usulan menu <strong>Makan Bergizi Gratis (MBG)</strong>. Apakah menu yang tersedia sudah memiliki zat gizi yang beragam dan energi yang sesuai? 
+                                </p>
+                                <p class="text-sm text-sage-700 mt-2">
+                                    Ayo, selidiki masalahnya, petakan bahan makanan, hitung kebutuhan energi, lalu rancang menu MBG yang bergizi seimbang!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Graphic Badges / Features -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
+                        <div class="bg-white p-3 rounded-2xl border border-sage-100 flex items-center gap-3">
+                            <span class="text-2xl">🔍</span>
+                            <div>
+                                <p class="text-xs font-bold text-sage-800">Investigasi</p>
+                                <p class="text-[10px] text-sage-500">Masalah Gizi</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3 rounded-2xl border border-sage-100 flex items-center gap-3">
+                            <span class="text-2xl">⚡</span>
+                            <div>
+                                <p class="text-xs font-bold text-sage-800">Hitung Energi</p>
+                                <p class="text-[10px] text-sage-500">Target MBG</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3 rounded-2xl border border-sage-100 flex items-center gap-3">
+                            <span class="text-2xl">🍱</span>
+                            <div>
+                                <p class="text-xs font-bold text-sage-800">100+ Pangan</p>
+                                <p class="text-[10px] text-sage-500">Peta Nutrisi</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3 rounded-2xl border border-sage-100 flex items-center gap-3">
+                            <span class="text-2xl">🍽️</span>
+                            <div>
+                                <p class="text-xs font-bold text-sage-800">Isi Piringku</p>
+                                <p class="text-[10px] text-sage-500">Desain Menu</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button onclick="goToPage(2)" class="px-8 py-4 bg-sage-500 hover:bg-sage-700 text-white font-display text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center gap-3 mx-auto group">
+                            <span>Mulai Kegiatan Detektif</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PAGE 2: KENALI TIM DETEKTIFMU -->
+        <!-- ========================================== -->
+        <section id="page-2" class="page-section hidden space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-3xl border border-sage-100 shadow-sm">
+                <div class="border-b border-sage-100 pb-4 mb-6">
+                    <span class="bg-sage-100 text-sage-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Langkah 1 dari 7</span>
+                    <h2 class="font-display text-2xl md:text-3xl font-bold text-sage-800 mt-2">Kenali Tim Detektifmu 🕵️‍♀️🕵️‍♂️</h2>
+                    <p class="text-sm text-sage-600">Isi identitas kelompok dan bagikan peran investigasi kepada seluruh anggota.</p>
+                </div>
+
+                <form id="team-form" class="space-y-6" onsubmit="event.preventDefault();">
+                    <!-- General Group Metadata -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-sage-800 mb-1">Nama Kelompok Detektif <span class="text-rose-500">*</span></label>
+                            <input type="text" id="input-group-name" placeholder="Misal: Detektif Nutrisi SMP 1" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:outline-none focus:ring-2 focus:ring-sage-500 text-sm bg-cream-50" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-sage-800 mb-1">Daftar Anggota Kelompok <span class="text-rose-500">*</span></label>
+                            <input type="text" id="input-group-members" placeholder="Misal: Andi, Budi, Citra, Dewi" class="w-full px-4 py-3 rounded-xl border border-sage-200 focus:outline-none focus:ring-2 focus:ring-sage-500 text-sm bg-cream-50" required>
+                        </div>
+                    </div>
+
+                    <h3 class="font-bold text-sage-800 text-lg pt-2 border-t border-sage-100">Pembagian Peran Spesialis Detektif</h3>
+                    <p class="text-xs text-sage-500">Pastikan semua peran terisi. Satu peran dapat diisi oleh lebih dari satu anggota.</p>
+
+                    <!-- Role Cards Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Role 1 -->
+                        <div class="bg-softYellow/40 p-5 rounded-2xl border border-amber-200 space-y-3 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-2xl">🥦</span>
+                                    <h4 class="font-bold text-sage-800">Ahli Bahan Makanan</h4>
+                                </div>
+                                <p class="text-xs text-sage-700 leading-relaxed">
+                                    Mengidentifikasi bahan makanan, mengelompokkan bahan berdasarkan kandungan zat gizi dominan, dan menentukan komponen menu MBG.
+                                </p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-sage-800 mb-1">Penanggung Jawab:</label>
+                                <input type="text" id="role-ahli-bahan" placeholder="Nama murid..." class="w-full px-3 py-2 rounded-lg border border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs bg-white" required>
+                            </div>
+                        </div>
+
+                        <!-- Role 2 -->
+                        <div class="bg-sage-50 p-5 rounded-2xl border border-sage-200 space-y-3 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-2xl">⚡</span>
+                                    <h4 class="font-bold text-sage-800">Analis Energi</h4>
+                                </div>
+                                <p class="text-xs text-sage-700 leading-relaxed">
+                                    Mencari informasi nilai energi bahan makanan, mencatat dalam tabel, menghitung total energi menu, dan membandingkannya dengan kebutuhan energi.
+                                </p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-sage-800 mb-1">Penanggung Jawab:</label>
+                                <input type="text" id="role-analis-energi" placeholder="Nama murid..." class="w-full px-3 py-2 rounded-lg border border-sage-300 focus:outline-none focus:ring-2 focus:ring-sage-500 text-xs bg-white" required>
+                            </div>
+                        </div>
+
+                        <!-- Role 3 -->
+                        <div class="bg-softPink/40 p-5 rounded-2xl border border-pink-200 space-y-3 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-2xl">⚖️</span>
+                                    <h4 class="font-bold text-sage-800">Analis Gizi</h4>
+                                </div>
+                                <p class="text-xs text-sage-700 leading-relaxed">
+                                    Menganalisis keberagaman bahan makanan, mengidentifikasi kekurangan menu, serta mengevaluasi kesesuaian menu dengan Isi Piringku.
+                                </p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-sage-800 mb-1">Penanggung Jawab:</label>
+                                <input type="text" id="role-analis-gizi" placeholder="Nama murid..." class="w-full px-3 py-2 rounded-lg border border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500 text-xs bg-white" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informational Note -->
+                    <div class="p-4 bg-cream-100 rounded-2xl border border-sage-200 flex items-start gap-3">
+                        <i class="fa-solid fa-circle-info text-sage-600 text-lg mt-0.5"></i>
+                        <p class="text-xs text-sage-700 leading-relaxed">
+                            <strong>Catatan Kerjasama:</strong> Pembagian peran digunakan untuk menentukan penanggung jawab utama setiap tugas. Seluruh anggota kelompok tetap wajib bekerja sama, berdiskusi, dan saling membantu dalam menyelesaikan setiap misi!
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PAGE 3: MISI 1 — INVESTIGASI MASALAH GIZI -->
+        <!-- ========================================== -->
+        <section id="page-3" class="page-section hidden space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-3xl border border-sage-100 shadow-sm space-y-6">
+                <div>
+                    <span class="bg-sage-100 text-sage-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Misi 1</span>
+                    <h2 class="font-display text-2xl font-bold text-sage-800 mt-2">Investigasi Masalah Gizi Remaja 🔍</h2>
+                </div>
+
+                <!-- Reading Material Box -->
+                <div class="bg-cream-50 p-5 rounded-2xl border border-sage-200 space-y-3 text-xs sm:text-sm text-sage-800 leading-relaxed">
+                    <h3 class="font-bold text-sage-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-book-open text-sage-600"></i> Latar Belakang Investigasi:
+                    </h3>
+                    <p>
+                        Penelitian yang dilakukan oleh Fakultas Kedokteran Universitas Indonesia (FKUI) bersama UNICEF, Wageningen University & Research, dan Sight and Life menunjukkan bahwa remaja Indonesia masih menghadapi masalah gizi, seperti kekurangan gizi, kelebihan berat badan atau obesitas, dan kekurangan zat gizi mikro seperti anemia.
+                    </p>
+                    <p>
+                        Pola makan yang kurang baik, kebiasaan mengonsumsi makanan cepat saji, kurangnya keberagaman makanan, dan rendahnya aktivitas fisik dapat berkontribusi terhadap masalah gizi. Oleh karena itu, remaja perlu memahami kandungan nutrisi dalam makanan dan membiasakan pola makan yang beragam.
+                    </p>
+                    <p class="text-[11px] text-sage-500 font-medium italic border-t border-sage-200 pt-2">
+                        Sumber: Info Sehat FKUI. <a href="https://fk.ui.ac.id/infosehat/fkui-lakukan-penelitian-bersama-tentang-gizi-remaja-indonesia/" target="_blank" class="text-sage-700 underline">https://fk.ui.ac.id/infosehat/...</a>
+                    </p>
+                </div>
+
+                <!-- Case Study -->
+                <div class="bg-softYellow/40 p-5 rounded-2xl border border-amber-200 space-y-2">
+                    <span class="bg-amber-200 text-amber-900 font-bold text-[10px] uppercase px-2 py-0.5 rounded-md">Kasus Investigasi Utama</span>
+                    <p class="text-sm font-semibold text-sage-800">
+                        Sekolah kalian akan menyusun usulan menu MBG. Draf awal menu yang tersedia yaitu: 
+                        <span class="underline decoration-amber-500 font-bold">Nasi putih 100 g, Lele goreng 100 g, dan Kerupuk udang 1 buah</span>. Selidiki apakah menu tersebut sudah memiliki zat gizi yang beragam!
+                    </p>
+                </div>
+
+                <!-- Task 1: Ahli Bahan Makanan -->
+                <div class="border border-sage-200 rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-lg">Tugas Ahli Bahan Makanan</span>
+                        <h4 class="font-bold text-sage-800 text-sm">Identifikasi Zat Gizi Dominan</h4>
+                    </div>
+                    <p class="text-xs text-sage-600">Pilih zat gizi yang terkandung/dominan pada bahan makanan berikut (boleh memilih lebih dari satu per bahan):</p>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-sage-50 text-sage-800 border-b border-sage-200">
+                                    <th class="p-3">Bahan Makanan</th>
+                                    <th class="p-3 text-center">Karbohidrat</th>
+                                    <th class="p-3 text-center">Protein</th>
+                                    <th class="p-3 text-center">Lemak</th>
+                                    <th class="p-3 text-center">Vitamin</th>
+                                    <th class="p-3 text-center">Mineral</th>
+                                    <th class="p-3 text-center">Air</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-sage-100">
+                                <tr>
+                                    <td class="p-3 font-semibold">Nasi Putih (100 g)</td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-nasi-carb" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-nasi-prot" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-nasi-fat" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-nasi-vit" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-nasi-min" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-nasi-water" class="w-4 h-4 text-sage-600 rounded"></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold">Lele Goreng (100 g)</td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-lele-carb" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-lele-prot" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-lele-fat" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-lele-vit" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-lele-min" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-lele-water" class="w-4 h-4 text-sage-600 rounded"></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold">Kerupuk Udang (1 buah)</td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-krupuk-carb" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-krupuk-prot" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-krupuk-fat" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-krupuk-vit" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-krupuk-min" class="w-4 h-4 text-sage-600 rounded"></td>
+                                    <td class="p-3 text-center"><input type="checkbox" id="m1-krupuk-water" class="w-4 h-4 text-sage-600 rounded"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Task 2: Analis Energi -->
+                <div class="border border-sage-200 rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-sage-100 text-sage-800 text-xs font-bold px-2.5 py-1 rounded-lg">Tugas Analis Energi</span>
+                            <h4 class="font-bold text-sage-800 text-sm">Pencatatan & Perhitungan Energi</h4>
+                        </div>
+                        <a href="https://www.fatsecret.co.id/kalori-gizi/search" target="_blank" class="text-xs bg-amber-100 text-amber-900 font-bold px-3 py-1 rounded-lg hover:bg-amber-200 transition-colors inline-flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Cek Komposisi FatSecret
+                        </a>
+                    </div>
+                    <p class="text-xs text-sage-600">Cari informasi nilai energi bahan makanan dari sumber rujukan dan isikan di bawah ini:</p>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-sage-50 text-sage-800 border-b border-sage-200">
+                                    <th class="p-3">Bahan Makanan</th>
+                                    <th class="p-3">Porsi / Ukuran</th>
+                                    <th class="p-3">Energi Input (kkal)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-sage-100">
+                                <tr>
+                                    <td class="p-3 font-semibold">Nasi Putih</td>
+                                    <td class="p-3">100 g</td>
+                                    <td class="p-3">
+                                        <input type="number" id="m1-kcal-nasi" placeholder="e.g. 130" oninput="calculateMisi1Total()" class="w-32 px-2 py-1 border border-sage-200 rounded text-xs">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold">Lele Goreng</td>
+                                    <td class="p-3">100 g</td>
+                                    <td class="p-3">
+                                        <input type="number" id="m1-kcal-lele" placeholder="e.g. 240" oninput="calculateMisi1Total()" class="w-32 px-2 py-1 border border-sage-200 rounded text-xs">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold">Kerupuk Udang</td>
+                                    <td class="p-3">1 buah sedang (15g)</td>
+                                    <td class="p-3">
+                                        <input type="number" id="m1-kcal-krupuk" placeholder="e.g. 75" oninput="calculateMisi1Total()" class="w-32 px-2 py-1 border border-sage-200 rounded text-xs">
+                                    </td>
+                                </tr>
+                                <tr class="bg-sage-50 font-bold">
+                                    <td colspan="2" class="p-3 text-right">TOTAL ENERGI MENU DRAF:</td>
+                                    <td class="p-3 text-sage-800"><span id="m1-total-kcal">0</span> kkal</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Task 3: Analis Gizi -->
+                <div class="border border-sage-200 rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-pink-100 text-pink-800 text-xs font-bold px-2.5 py-1 rounded-lg">Tugas Analis Gizi</span>
+                        <h4 class="font-bold text-sage-800 text-sm">Evaluasi Keberagaman Nutrisi Menu</h4>
+                    </div>
+                    <label class="block text-xs font-semibold text-sage-700">
+                        Apakah menu MBG draf di atas sudah memiliki bahan makanan dan zat gizi yang beragam? Jika belum, bahan makanan atau komponen apa (misalnya sayur/buah) yang perlu ditambahkan? Jelaskan alasanmu!
+                    </label>
+                    <textarea id="m1-analysis-text" rows="4" placeholder="Tuliskan hasil analisis kelompokmu di sini..." class="w-full p-3 rounded-xl border border-sage-200 focus:outline-none focus:ring-2 focus:ring-sage-500 text-xs bg-cream-50"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PAGE 4: MISI 2 — MENGUNGKAP KEBUTUHAN ENERGI -->
+        <!-- ========================================== -->
+        <section id="page-4" class="page-section hidden space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-3xl border border-sage-100 shadow-sm space-y-6">
+                <div>
+                    <span class="bg-sage-100 text-sage-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Misi 2</span>
+                    <h2 class="font-display text-2xl font-bold text-sage-800 mt-2">Mengungkap Kebutuhan Energi ⚡</h2>
+                </div>
+
+                <!-- MSD Reference Section -->
+                <div class="bg-sage-50 p-5 rounded-2xl border border-sage-200 space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <h3 class="font-bold text-sage-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-table text-sage-600"></i> Tabel Acuan Perkiraan Kalori Harian (MSD Manuals)
+                        </h3>
+                        <button onclick="toggleMsdTable()" class="text-xs bg-white text-sage-800 font-bold px-3 py-1.5 rounded-xl border border-sage-200 hover:bg-sage-100 transition-colors">
+                            <i class="fa-solid fa-eye mr-1"></i> <span id="msd-toggle-text">Buka Tabel Acuan</span>
+                        </button>
+                    </div>
+
+                    <!-- Expandable Table -->
+                    <div id="msd-table-container" class="hidden overflow-x-auto pt-3 border-t border-sage-200">
+                        <table class="w-full text-left border-collapse text-xs bg-white rounded-xl overflow-hidden shadow-xs">
+                            <thead class="bg-sage-500 text-white">
+                                <tr>
+                                    <th class="p-2.5">Jenis Kelamin</th>
+                                    <th class="p-2.5">Usia</th>
+                                    <th class="p-2.5">Kurang Aktif (kkal/hari)</th>
+                                    <th class="p-2.5">Aktif (kkal/hari)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-sage-100">
+                                <tr><td class="p-2.5 font-semibold" rowspan="4">Perempuan</td><td class="p-2">2 - 6 Tahun</td><td class="p-2">1.000 - 1.200</td><td class="p-2">1.000 - 1.400</td></tr>
+                                <tr><td class="p-2">7 - 18 Tahun</td><td class="p-2">1.200 - 1.800</td><td class="p-2">1.600 - 2.400</td></tr>
+                                <tr><td class="p-2">19 - 60 Tahun</td><td class="p-2">1.600 - 2.000</td><td class="p-2">2.000 - 2.400</td></tr>
+                                <tr><td class="p-2">> 61 Tahun</td><td class="p-2">1.600</td><td class="p-2">1.800</td></tr>
+                                <tr class="bg-cream-50"><td class="p-2.5 font-semibold" rowspan="4">Laki-laki</td><td class="p-2">2 - 6 Tahun</td><td class="p-2">1.000 - 1.400</td><td class="p-2">1.000 - 1.400</td></tr>
+                                <tr class="bg-cream-50"><td class="p-2">7 - 18 Tahun</td><td class="p-2">1.400 - 2.000</td><td class="p-2">1.800 - 3.200</td></tr>
+                                <tr class="bg-cream-50"><td class="p-2">19 - 60 Tahun</td><td class="p-2">2.000 - 2.400</td><td class="p-2">2.400 - 3.000</td></tr>
+                                <tr class="bg-cream-50"><td class="p-2">> 61 Tahun</td><td class="p-2">2.000</td><td class="p-2">2.200 - 2.600</td></tr>
+                            </tbody>
+                        </table>
+                        <p class="text-[11px] text-sage-500 mt-2">
+                            Tautan Resmi: <a href="https://www.msdmanuals.com/id/home/multimedia/table/perkiraan-jumlah-kalori-yang-diperlukan-berdasarkan-usia-jenis-kelamin-dan-tingkat-aktivitas" target="_blank" class="underline">MSD Manuals Kebutuhan Kalori</a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Calculator Form -->
+                <div class="border border-sage-200 rounded-2xl p-5 space-y-4">
+                    <span class="bg-sage-100 text-sage-800 text-xs font-bold px-2.5 py-1 rounded-lg">Tugas Analis Energi</span>
+                    <h3 class="font-bold text-sage-800 text-base">Form Profil Kebutuhan Energi Harian Murid</h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-sage-800 mb-1">Jenis Kelamin</label>
+                            <select id="m2-gender" class="w-full p-2.5 rounded-xl border border-sage-200 text-xs bg-cream-50">
+                                <option value="Perempuan">Perempuan</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-sage-800 mb-1">Usia</label>
+                            <select id="m2-age" class="w-full p-2.5 rounded-xl border border-sage-200 text-xs bg-cream-50">
+                                <option value="7-18">7 - 18 Tahun (Remaja)</option>
+                                <option value="2-6">2 - 6 Tahun</option>
+                                <option value="19-60">19 - 60 Tahun</option>
+                                <option value="61+">> 61 Tahun</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-sage-800 mb-1">Tingkat Aktivitas</label>
+                            <select id="m2-activity" class="w-full p-2.5 rounded-xl border border-sage-200 text-xs bg-cream-50">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Kurang Aktif">Kurang Aktif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Range input from MSD manually filled by student -->
+                    <div class="bg-softYellow/30 p-4 rounded-xl border border-amber-200 space-y-2">
+                        <label class="block text-xs font-bold text-sage-800">
+                            Berdasarkan Tabel Acuan, tuliskan Rentang Kebutuhan Energi Harianmu (kkal):
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="m2-daily-min" placeholder="Batas Bawah (e.g. 1600)" oninput="updateMisi2Calculations()" class="w-full p-2.5 rounded-xl border border-sage-200 text-xs">
+                            <span class="font-bold text-sage-600">s/d</span>
+                            <input type="number" id="m2-daily-max" placeholder="Batas Atas (e.g. 2400)" oninput="updateMisi2Calculations()" class="w-full p-2.5 rounded-xl border border-sage-200 text-xs">
+                            <span class="font-bold text-sage-800 text-xs">kkal</span>
+                        </div>
+                    </div>
+
+                    <!-- Target Lunch Energy (30%) -->
+                    <div class="bg-sage-50 p-4 rounded-xl border border-sage-200 space-y-3">
+                        <h4 class="font-bold text-sage-800 text-xs">Target Energi Makan Siang (30% Energi Harian)</h4>
+                        <p class="text-xs text-sage-600">
+                            Rumus: <em>Energi Makan Siang = Kebutuhan Energi Harian × 30%</em>
+                        </p>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-sage-700">Tuliskan Cara Perhitungannya di sini:</label>
+                            <input type="text" id="m2-calc-steps" placeholder="Contoh: (1600 x 30% = 480) s/d (2400 x 30% = 720)" class="w-full p-2.5 rounded-xl border border-sage-200 text-xs bg-white">
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-sage-200 font-bold text-sage-800 text-xs">
+                            <span>Rentang Target Energi Makan Siang (MBG):</span>
+                            <span class="text-sage-700 font-extrabold text-sm"><span id="m2-target-min">0</span> - <span id="m2-target-max">0</span> kkal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PAGE 5: MISI 3 — BERBURU & MEMETAKAN PANGAN -->
+        <!-- ========================================== -->
+        <section id="page-5" class="page-section hidden space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-3xl border border-sage-100 shadow-sm space-y-6">
+                <div>
+                    <span class="bg-sage-100 text-sage-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Misi 3</span>
+                    <h2 class="font-display text-2xl font-bold text-sage-800 mt-2">Berburu & Memetakan Bahan Makanan 🌾🥦</h2>
+                    <p class="text-xs text-sage-600 mt-1">Cari bahan makanan, tebak zat gizi dominannya, dan tambahkan ke daftar pemetaan timmu!</p>
+                </div>
+
+                <!-- Search & Category Filters -->
+                <div class="space-y-3">
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-4 top-3.5 text-sage-400"></i>
+                        <input type="text" id="m3-search-input" onkeyup="filterFoodBank()" placeholder="Cari nama bahan makanan (misal: Tempe, Bayam, Nasi, Ayam...)" class="w-full pl-11 pr-4 py-3 rounded-2xl border border-sage-200 focus:outline-none focus:ring-2 focus:ring-sage-500 text-xs bg-cream-50">
+                    </div>
+
+                    <!-- Filter chips -->
+                    <div id="m3-category-chips" class="flex items-center gap-1.5 overflow-x-auto pb-2 text-[11px]">
+                        <button onclick="setFoodCategory('all')" class="chip-btn active px-3 py-1.5 rounded-xl bg-sage-500 text-white font-bold whitespace-nowrap">Semua (100+)</button>
+                        <button onclick="setFoodCategory('Makanan Pokok')" class="chip-btn px-3 py-1.5 rounded-xl bg-sage-50 text-sage-700 border border-sage-200 font-semibold whitespace-nowrap">Makanan Pokok</button>
+                        <button onclick="setFoodCategory('Protein Hewani')" class="chip-btn px-3 py-1.5 rounded-xl bg-sage-50 text-sage-700 border border-sage-200 font-semibold whitespace-nowrap">Protein Hewani</button>
+                        <button onclick="setFoodCategory('Protein Nabati')" class="chip-btn px-3 py-1.5 rounded-xl bg-sage-50 text-sage-700 border border-sage-200 font-semibold whitespace-nowrap">Protein Nabati</button>
+                        <button onclick="setFoodCategory('Sayuran')" class="chip-btn px-3 py-1.5 rounded-xl bg-sage-50 text-sage-700 border border-sage-200 font-semibold whitespace-nowrap">Sayuran</button>
+                        <button onclick="setFoodCategory('Buah-buahan')" class="chip-btn px-3 py-1.5 rounded-xl bg-sage-50 text-sage-700 border border-sage-200 font-semibold whitespace-nowrap">Buah-buahan</button>
+                        <button onclick="setFoodCategory('Olahan Khas Indonesia')" class="chip-btn px-3 py-1.5 rounded-xl bg-sage-50 text-sage-700 border border-sage-200 font-semibold whitespace-nowrap">Olahan Indonesia</button>
+                    </div>
+                </div>
+
+                <!-- Active Investigation Workspace Card -->
+                <div id="m3-investigation-card" class="hidden bg-softYellow/30 p-5 rounded-2xl border border-amber-300 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span id="m3-card-icon" class="text-3xl">🍲</span>
+                            <div>
+                                <h4 id="m3-card-title" class="font-bold text-sage-800 text-base">Nama Bahan</h4>
+                                <span id="m3-card-cat" class="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-md">Kategori</span>
+                            </div>
+                        </div>
+                        <button onclick="closeInvestigationCard()" class="text-sage-400 hover:text-sage-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+
+                    <p class="text-xs text-sage-700 font-medium">
+                        Menurutmu, zat gizi apa yang <strong>paling dominan</strong> atau menjadi fungsi utama bahan makanan ini?
+                    </p>
+
+                    <!-- 6 Nutrient Choice Buttons -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <button onclick="checkNutrientAnswer('Karbohidrat')" class="nutrient-opt-btn border border-sage-200 bg-white p-2.5 rounded-xl font-bold text-xs hover:border-sage-500 transition-colors">🌾 Karbohidrat</button>
+                        <button onclick="checkNutrientAnswer('Protein')" class="nutrient-opt-btn border border-sage-200 bg-white p-2.5 rounded-xl font-bold text-xs hover:border-sage-500 transition-colors">🍗 Protein</button>
+                        <button onclick="checkNutrientAnswer('Lemak')" class="nutrient-opt-btn border border-sage-200 bg-white p-2.5 rounded-xl font-bold text-xs hover:border-sage-500 transition-colors">🥑 Lemak</button>
+                        <button onclick="checkNutrientAnswer('Vitamin')" class="nutrient-opt-btn border border-sage-200 bg-white p-2.5 rounded-xl font-bold text-xs hover:border-sage-500 transition-colors">🍊 Vitamin</button>
+                        <button onclick="checkNutrientAnswer('Mineral')" class="nutrient-opt-btn border border-sage-200 bg-white p-2.5 rounded-xl font-bold text-xs hover:border-sage-500 transition-colors">🥦 Mineral</button>
+                        <button onclick="checkNutrientAnswer('Air')" class="nutrient-opt-btn border border-sage-200 bg-white p-2.5 rounded-xl font-bold text-xs hover:border-sage-500 transition-colors">💧 Air</button>
+                    </div>
+
+                    <!-- Feedback Alert -->
+                    <div id="m3-feedback-box" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
+                </div>
+
+                <!-- Food Results Grid -->
+                <div>
+                    <h4 class="font-bold text-sage-800 text-sm mb-3">Katalog Bahan Makanan (Klik untuk Memetakan)</h4>
+                    <div id="m3-food-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-80 overflow-y-auto p-1">
+                        <!-- Dynamic Cards Inserted Here -->
+                    </div>
+                </div>
+
+                <!-- Successfully Mapped List -->
+                <div class="border-t border-sage-100 pt-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-sage-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-sage-500"></i> Daftar Bahan yang Berhasil Dipetakan (<span id="m3-mapped-count">0</span>)
+                        </h4>
+                    </div>
+
+                    <div id="m3-mapped-list" class="flex flex-wrap gap-2 min-h-12 p-3 bg-cream-50 rounded-2xl border border-sage-200">
+                        <p class="text-xs text-sage-400 italic">Belum ada bahan yang dipetakan. Pilih bahan makanan di atas!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PAGE 6: MISI 4 — MERANCANG MENU MBG -->
+        <!-- ========================================== -->
+        <section id="page-6" class="page-section hidden space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-3xl border border-sage-100 shadow-sm space-y-6">
+                <div>
+                    <span class="bg-sage-100 text-sage-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Misi 4</span>
+                    <h2 class="font-display text-2xl font-bold text-sage-800 mt-2">Merancang Menu MBG & Isi Piringku 🍱</h2>
+                    <p class="text-xs text-sage-600">Pilih bahan makanan dari katalog, hitung total energi, dan susun ke piring gizi seimbang.</p>
+                </div>
+
+                <!-- Step 1: Menu Selector & Energy Table (Analis Energi) -->
+                <div class="border border-sage-200 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-sage-100 text-sage-800 text-xs font-bold px-2.5 py-1 rounded-lg">Tugas Analis Energi & Bahan</span>
+                            <h3 class="font-bold text-sage-800 text-sm">Pilihan Bahan Menu MBG Tim</h3>
+                        </div>
+                        <span class="text-xs text-sage-600 bg-cream-100 px-3 py-1 rounded-full border border-sage-200">
+                            Target Energi Siang: <strong class="text-sage-800"><span id="m4-target-display">480 - 720</span> kkal</strong>
+                        </span>
+                    </div>
+
+                    <!-- Quick Add Food Dropdown from Bank -->
+                    <div class="flex gap-2">
+                        <select id="m4-food-select" class="w-full p-2.5 rounded-xl border border-sage-200 text-xs bg-cream-50">
+                            <option value="">-- Pilih Bahan Makanan dari Katalog (100+) --</option>
+                        </select>
+                        <button onclick="addSelectedFoodToMisi4()" class="px-4 py-2.5 bg-sage-500 hover:bg-sage-700 text-white font-bold rounded-xl text-xs whitespace-nowrap transition-colors">
+                            <i class="fa-solid fa-plus mr-1"></i> Tambah Menu
+                        </button>
+                    </div>
+
+                    <!-- Selected Menu Dynamic Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-sage-50 text-sage-800 border-b border-sage-200">
+                                    <th class="p-3">Bahan Makanan</th>
+                                    <th class="p-3">Porsi / Berat (g)</th>
+                                    <th class="p-3">Karbo (g)</th>
+                                    <th class="p-3">Protein (g)</th>
+                                    <th class="p-3">Lemak (g)</th>
+                                    <th class="p-3">Energi (kkal)</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="m4-menu-table-body" class="divide-y divide-sage-100">
+                                <tr>
+                                    <td colspan="7" class="p-4 text-center text-sage-400 italic">Belum ada bahan dipilih. Tambahkan bahan dari menu di atas!</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-sage-50 font-bold text-sage-800 border-t border-sage-200">
+                                    <td colspan="5" class="p-3 text-right">TOTAL ENERGI RANCANGAN MENU:</td>
+                                    <td class="p-3 text-sage-700"><span id="m4-total-energy">0</span> kkal</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Energy Comparison Warning/Success -->
+                    <div id="m4-energy-status-box" class="p-3 rounded-xl text-xs font-semibold flex items-center gap-2 bg-cream-100 text-sage-700">
+                        <i class="fa-solid fa-circle-info"></i> Masukkan kalori bahan makanan di atas untuk mengevaluasi energi menu.
+                    </div>
+                </div>
+
+                <!-- Step 2: Interactive Isi Piringku Visualizer (Ahli Bahan) -->
+                <div class="border border-sage-200 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-amber-100 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-lg">Tugas Ahli Bahan Makanan</span>
+                        <h3 class="font-bold text-sage-800 text-sm">Visualisasi Porsi "Isi Piringku"</h3>
+                    </div>
+                    <p class="text-xs text-sage-600">
+                        Petunjuk: Klik atau seret bahan menu rancanganmu di sebelah kiri ke zona piring yang sesuai di sebelah kanan!
+                    </p>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        <!-- Unplaced Food Items Bucket -->
+                        <div class="lg:col-span-4 bg-cream-50 p-4 rounded-2xl border border-sage-200 space-y-3">
+                            <h4 class="font-bold text-sage-800 text-xs flex items-center gap-1">
+                                <i class="fa-solid fa-basket-shopping text-sage-600"></i> Bahan Menu Tersedia:
+                            </h4>
+                            <div id="m4-unplaced-items" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                                <p class="text-xs text-sage-400 italic">Tambahkan bahan menu pada tabel di atas terlebih dahulu.</p>
+                            </div>
+                        </div>
+
+                        <!-- Plate Canvas Layout -->
+                        <div class="lg:col-span-8 bg-white p-4 rounded-2xl border border-sage-200 space-y-3 flex flex-col items-center">
+                            <h4 class="font-bold text-sage-800 text-xs text-center">Piring Makan Bergizi Seimbang (Keseimbangan Porsi)</h4>
+
+                            <!-- Circular Plate Representation -->
+                            <div class="w-72 h-72 sm:w-80 sm:h-80 rounded-full border-8 border-sage-200 shadow-md relative overflow-hidden bg-cream-50 grid grid-cols-2 grid-rows-2 gap-1 p-1">
+                                <!-- Top Left: Makanan Pokok (2/6 ~ 33%) -->
+                                <div id="plate-pokok" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Makanan Pokok')" class="plate-quadrant bg-amber-50/70 border border-dashed border-amber-300 rounded-tl-full p-3 flex flex-col items-center justify-center text-center overflow-hidden">
+                                    <span class="text-xs font-bold text-amber-900">🌾 Makanan Pokok</span>
+                                    <span class="text-[10px] text-amber-700">(2/6 Bagian)</span>
+                                    <div class="plate-items flex flex-wrap justify-center gap-1 mt-1 text-[10px]"></div>
+                                </div>
+
+                                <!-- Top Right: Lauk Pauk (1/6 ~ 17%) -->
+                                <div id="plate-lauk" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Lauk Pauk')" class="plate-quadrant bg-rose-50/70 border border-dashed border-rose-300 rounded-tr-full p-3 flex flex-col items-center justify-center text-center overflow-hidden">
+                                    <span class="text-xs font-bold text-rose-900">🍗 Lauk-Pauk</span>
+                                    <span class="text-[10px] text-rose-700">(1/6 Bagian)</span>
+                                    <div class="plate-items flex flex-wrap justify-center gap-1 mt-1 text-[10px]"></div>
+                                </div>
+
+                                <!-- Bottom Left: Sayuran (2/6 ~ 33%) -->
+                                <div id="plate-sayur" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Sayuran')" class="plate-quadrant bg-emerald-50/70 border border-dashed border-emerald-300 rounded-bl-full p-3 flex flex-col items-center justify-center text-center overflow-hidden">
+                                    <span class="text-xs font-bold text-emerald-900">🥦 Sayuran</span>
+                                    <span class="text-[10px] text-emerald-700">(2/6 Bagian)</span>
+                                    <div class="plate-items flex flex-wrap justify-center gap-1 mt-1 text-[10px]"></div>
+                                </div>
+
+                                <!-- Bottom Right: Buah-buahan (1/6 ~ 17%) -->
+                                <div id="plate-buah" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Buah-buahan')" class="plate-quadrant bg-orange-50/70 border border-dashed border-orange-300 rounded-br-full p-3 flex flex-col items-center justify-center text-center overflow-hidden">
+                                    <span class="text-xs font-bold text-orange-900">🍊 Buah-Buahan</span>
+                                    <span class="text-[10px] text-orange-700">(1/6 Bagian)</span>
+                                    <div class="plate-items flex flex-wrap justify-center gap-1 mt-1 text-[10px]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Qualitative Reflection (Analis Gizi) -->
+                <div class="border border-sage-200 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-pink-100 text-pink-800 text-xs font-bold px-2.5 py-1 rounded-lg">Tugas Analis Gizi</span>
+                        <h3 class="font-bold text-sage-800 text-sm">Evaluasi & Justifikasi Menu MBG</h3>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-sage-800 mb-1">
+                                1. Apakah menu MBG yang kalian susun sudah memiliki komponen makanan dan zat gizi yang beragam? Jelaskan alasanmu!
+                            </label>
+                            <textarea id="m4-q1" rows="3" placeholder="Jelaskan alasan keberagaman bahan & gizi..." class="w-full p-3 rounded-xl border border-sage-200 focus:outline-none focus:ring-2 focus:ring-sage-500 bg-cream-50"></textarea>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-sage-800 mb-1">
+                                2. Bandingkan total energi menu dengan rentang kebutuhan energi makan siang pada Misi 2. Apakah energi menu sudah sesuai? Jika belum, apa yang perlu diperbaiki?
+                            </label>
+                            <textarea id="m4-q2" rows="3" placeholder="Jelaskan kesesuaian total energi..." class="w-full p-3 rounded-xl border border-sage-200 focus:outline-none focus:ring-2 focus:ring-sage-500 bg-cream-50"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PAGE 7: MISI 5 — PAMERKAN KREASI MENU MBG -->
+        <!-- ========================================== -->
+        <section id="page-7" class="page-section hidden space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-3xl border border-sage-100 shadow-sm space-y-6">
+                <div>
+                    <span class="bg-sage-100 text-sage-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Misi 5</span>
+                    <h2 class="font-display text-2xl font-bold text-sage-800 mt-2">Pamerkan Kreasi Menu MBG! 🎨✨</h2>
+                    <p class="text-xs text-sage-600">Presentasikan hasil rancangan menu MBG kelompok dalam bentuk karya kreatif!</p>
+                </div>
+
+                <!-- Choice of Creative Medium -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold text-sage-800">Pilih Jenis Karya Kreatif Kelompok:</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                            <input type="radio" name="m5-medium" value="Poster" checked class="text-sage-600">
+                            <span class="text-xs font-bold text-sage-800">🖼️ Poster Kreatif</span>
+                        </label>
+                        <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                            <input type="radio" name="m5-medium" value="Infografis" class="text-sage-600">
+                            <span class="text-xs font-bold text-sage-800">📊 Infografis Nutrisi</span>
+                        </label>
+                        <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                            <input type="radio" name="m5-medium" value="Video Kreatif" class="text-sage-600">
+                            <span class="text-xs font-bold text-sage-800">🎥 Video Singkat</span>
+                        </label>
+                        <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                            <input type="radio" name="m5-medium" value="Presentasi PPT" class="text-sage-600">
+                            <span class="text-xs font-bold text-sage-800">💻 Slides Presentasi</span>
+                        </label>
+                        <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                            <input type="radio" name="m5-medium" value="Animasi" class="text-sage-600">
+                            <span class="text-xs font-bold text-sage-800">🎬 Video Animasi</span>
+                        </label>
+                        <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                            <input type="radio" name="m5-medium" value="Karya Lainnya" class="text-sage-600">
+                            <span class="text-xs font-bold text-sage-800">✨ Karya Lainnya</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submission Form -->
+                <div class="space-y-4 border border-sage-200 rounded-2xl p-5 bg-cream-50">
+                    <div>
+                        <label class="block text-xs font-bold text-sage-800 mb-1">Judul Karya / Poster Menu MBG</label>
+                        <input type="text" id="m5-title" placeholder="Misal: Poster Menu MBG Gizi Seimbang Nusantara" class="w-full p-3 rounded-xl border border-sage-200 text-xs bg-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-sage-800 mb-1">Pembagian Tugas Pembuatan Karya</label>
+                        <input type="text" id="m5-roles-desc" placeholder="Misal: Andi (Desain Canva), Budi (Naskah), Citra (Editor)" class="w-full p-3 rounded-xl border border-sage-200 text-xs bg-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-sage-800 mb-1">Simulasi Unggah File Karya (Gambar/Video/Dokumen)</label>
+                        <input type="file" id="m5-file-input" onchange="handleFileUpload(event)" class="w-full p-2 text-xs bg-white border border-sage-200 rounded-xl">
+                        <div id="m5-file-preview" class="mt-2 text-xs text-sage-700 font-semibold"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-sage-800 mb-1">Tautan Karya (Google Drive / Canva / YouTube / Link Karya)</label>
+                        <input type="url" id="m5-link" placeholder="https://canva.com/design/... atau link drive" class="w-full p-3 rounded-xl border border-sage-200 text-xs bg-white">
+                    </div>
+                </div>
+
+                <div class="flex justify-start">
+                    <button onclick="goToPage(6)" class="px-4 py-2 bg-cream-200 hover:bg-sage-200 text-sage-800 font-bold rounded-xl text-xs flex items-center gap-2 transition-colors">
+                        <i class="fa-solid fa-pen-to-square"></i> Perbaiki Rancangan Menu (Kembali ke Misi 4)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PAGE 8: PENUTUP & REFLEKSI -->
+        <!-- ========================================== -->
+        <section id="page-8" class="page-section hidden space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-3xl border border-sage-100 shadow-sm space-y-6">
+                <!-- Congratulatory Header -->
+                <div class="bg-gradient-to-r from-sage-500 to-sage-700 p-6 rounded-2xl text-white text-center space-y-2 shadow-sm">
+                    <span class="text-4xl">🎉🥳🏆</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold">Selamat, Detektif Nutrisi!</h2>
+                    <p class="text-xs sm:text-sm text-sage-100 max-w-xl mx-auto leading-relaxed">
+                        Kalian telah sukses menyelidiki masalah gizi, mengenali bahan makanan, menghitung kebutuhan energi, dan merancang menu MBG yang beragam dan bergizi seimbang!
+                    </p>
+                </div>
+
+                <!-- Reflection Questionnaire -->
+                <div class="border border-sage-200 rounded-2xl p-5 space-y-4">
+                    <h3 class="font-bold text-sage-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-amber-500"></i> Pertanyaan Refleksi Pembelajaran
+                    </h3>
+
+                    <div class="space-y-4 text-xs">
+                        <div>
+                            <label class="block font-semibold text-sage-800 mb-1">1. Apa pengetahuan atau wawasan baru yang kalian peroleh selama kegiatan ini?</label>
+                            <textarea id="ref-q1" rows="2" placeholder="Tuliskan pengetahuan barumu..." class="w-full p-3 rounded-xl border border-sage-200 bg-cream-50 focus:ring-2 focus:ring-sage-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-sage-800 mb-1">2. Apa yang akan kalian perhatikan ketika memilih makanan sehari-hari mulai sekarang?</label>
+                            <textarea id="ref-q2" rows="2" placeholder="Tuliskan komitmen pilihan makananmu..." class="w-full p-3 rounded-xl border border-sage-200 bg-cream-50 focus:ring-2 focus:ring-sage-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-sage-800 mb-1">3. Apa kontribusimu dan bagaimana kerja sama tim dalam kelompokmu?</label>
+                            <textarea id="ref-q3" rows="2" placeholder="Tuliskan refleksi kerja samamu..." class="w-full p-3 rounded-xl border border-sage-200 bg-cream-50 focus:ring-2 focus:ring-sage-500"></textarea>
+                        </div>
+
+                        <!-- Sentiment Emoji Picker -->
+                        <div>
+                            <label class="block font-semibold text-sage-800 mb-2">4. Bagaimana perasaan kalian setelah mengikuti pembelajaran IPA hari ini?</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                                    <input type="radio" name="ref-feeling" value="Senang Banget 😍" checked>
+                                    <span class="text-xs font-bold text-sage-800">Senang Banget 😍</span>
+                                </label>
+                                <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                                    <input type="radio" name="ref-feeling" value="Menyenangkan 🙂">
+                                    <span class="text-xs font-bold text-sage-800">Menyenangkan 🙂</span>
+                                </label>
+                                <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                                    <input type="radio" name="ref-feeling" value="Susah 😕">
+                                    <span class="text-xs font-bold text-sage-800">Susah 😕</span>
+                                </label>
+                                <label class="border border-sage-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-sage-50 transition-colors">
+                                    <input type="radio" name="ref-feeling" value="Marah 😡">
+                                    <span class="text-xs font-bold text-sage-800">Marah 😡</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Action Buttons -->
+                <div class="bg-softYellow/40 p-5 rounded-2xl border border-amber-200 space-y-4 text-center">
+                    <h4 class="font-bold text-sage-800 text-sm">Kirim Laporan Hasil Kegiatan Lembar Kerja Murid (LKM)</h4>
+                    <p class="text-xs text-sage-600">
+                        Klik tombol di bawah untuk mengunduh cetakan PDF LKM dan secara otomatis mengirimkan jawaban ke Dashboard Guru!
+                    </p>
+                    
+                    <button onclick="downloadPdfAndSendToGuru()" class="px-6 py-3.5 bg-sage-500 hover:bg-sage-700 text-white font-display text-base font-bold rounded-2xl shadow-md transition-all inline-flex items-center gap-2">
+                        <i class="fa-solid fa-file-pdf text-lg"></i> Unduh LKM PDF & Kirim ke Guru
+                    </button>
+                    
+                    <div id="sync-status-msg" class="text-xs font-bold text-sage-700 hidden"></div>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-sage-100 flex-wrap gap-2">
+                    <button onclick="goToPage(1)" class="px-4 py-2.5 bg-cream-100 hover:bg-sage-100 text-sage-800 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-house"></i> Kembali ke Beranda
+                    </button>
+                    <button onclick="resetAllActivity()" class="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-rotate-right"></i> Ulangi Kegiatan
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER NAV BAR (FIXED ON BOTTOM FOR WORKFLOW) -->
+    <footer class="sticky bottom-0 z-40 bg-white border-t border-sage-200 shadow-lg py-3 px-4 no-print">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <button id="btn-back" onclick="navigatePrev()" class="px-5 py-2.5 bg-sage-100 hover:bg-sage-200 text-sage-800 font-bold rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-arrow-left"></i> <span>Kembali (Back)</span>
+            </button>
+
+            <span id="page-indicator" class="text-xs font-bold text-sage-600 hidden sm:inline">Halaman 1 dari 8</span>
+
+            <button id="btn-next" onclick="navigateNext()" class="px-5 py-2.5 bg-sage-500 hover:bg-sage-700 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed">
+                <span>Lanjut (Next)</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- PRINT REPORT CONTAINER (Only visible during PDF generation/Printing) -->
+    <div id="print-report-container" class="hidden print-only p-8 bg-white text-black space-y-6">
+        <!-- Print layout header -->
+        <div class="border-b-2 border-black pb-4 text-center">
+            <h1 class="text-2xl font-bold">LAPORAN HASIL KEGIATAN LEMBAR KERJA MURID (LKM)</h1>
+            <h2 class="text-lg font-bold">DETEKTIF NUTRISI: MISI MERANCANG MENU MBG</h2>
+        </div>
+        <div id="print-content-body" class="space-y-4 text-sm"></div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // =========================================================================
+        // 1. GLOBAL STATE & COMPREHENSIVE 100+ FOOD BANK DATA
+        // =========================================================================
+        let currentPage = 1;
+        const totalPages = 8;
+        let currentFontSize = 16;
+        let currentSpeech = null;
+
+        // Comprehensive 100+ Indonesian Foods Database
+        const foodDatabase = [
+            // Makanan Pokok (Carbohydrate dominant)
+            { id: 1, name: "Nasi Putih", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍚", kcal: 130 },
+            { id: 2, name: "Nasi Merah", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍚", kcal: 110 },
+            { id: 3, name: "Nasi Jagung", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🌽", kcal: 150 },
+            { id: 4, name: "Nasi Kuning", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍚", kcal: 160 },
+            { id: 5, name: "Nasi Uduk", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍚", kcal: 175 },
+            { id: 6, name: "Nasi Liwet", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍚", kcal: 155 },
+            { id: 7, name: "Bubur Nasi", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🥣", kcal: 90 },
+            { id: 8, name: "Lontong", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍙", kcal: 130 },
+            { id: 9, name: "Ketupat", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍙", kcal: 140 },
+            { id: 10, name: "Kentang Rebus", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🥔", kcal: 87 },
+            { id: 11, name: "Kentang Panggang", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🥔", kcal: 93 },
+            { id: 12, name: "Ubi Jalar Rebus", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍠", kcal: 86 },
+            { id: 13, name: "Singkong Rebus", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🥔", kcal: 160 },
+            { id: 14, name: "Jagung Rebus", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🌽", kcal: 96 },
+            { id: 15, name: "Talas Rebus", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🥔", kcal: 112 },
+            { id: 16, name: "Roti Tawar", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍞", kcal: 80 },
+            { id: 17, name: "Roti Gandum", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍞", kcal: 70 },
+            { id: 18, name: "Mi Rebus", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍜", kcal: 180 },
+            { id: 19, name: "Bihun Rebus", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍜", kcal: 108 },
+            { id: 20, name: "Makaroni", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍝", kcal: 131 },
+            { id: 21, name: "Pasta Spaghetti", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🍝", kcal: 158 },
+            { id: 22, name: "Oatmeal", cat: "Makanan Pokok", nutrient: "Karbohidrat", icon: "🥣", kcal: 68 },
+
+            // Protein Hewani (Protein dominant)
+            { id: 23, name: "Telur Rebus", cat: "Protein Hewani", nutrient: "Protein", icon: "🥚", kcal: 78 },
+            { id: 24, name: "Telur Dadar", cat: "Protein Hewani", nutrient: "Protein", icon: "🍳", kcal: 110 },
+            { id: 25, name: "Telur Orak-arik", cat: "Protein Hewani", nutrient: "Protein", icon: "🍳", kcal: 100 },
+            { id: 26, name: "Ayam Panggang", cat: "Protein Hewani", nutrient: "Protein", icon: "🍗", kcal: 165 },
+            { id: 27, name: "Ayam Kukus", cat: "Protein Hewani", nutrient: "Protein", icon: "🍗", kcal: 140 },
+            { id: 28, name: "Ayam Bakar", cat: "Protein Hewani", nutrient: "Protein", icon: "🍗", kcal: 170 },
+            { id: 29, name: "Ayam Suwir", cat: "Protein Hewani", nutrient: "Protein", icon: "🍗", kcal: 150 },
+            { id: 30, name: "Daging Sapi Panggang", cat: "Protein Hewani", nutrient: "Protein", icon: "🥩", kcal: 250 },
+            { id: 31, name: "Daging Semur", cat: "Protein Hewani", nutrient: "Protein", icon: "🥩", kcal: 220 },
+            { id: 32, name: "Bakso Sapi", cat: "Protein Hewani", nutrient: "Protein", icon: "🧆", kcal: 200 },
+            { id: 33, name: "Ikan Lele Goreng", cat: "Protein Hewani", nutrient: "Protein", icon: "🐟", kcal: 240 },
+            { id: 34, name: "Ikan Nila Bakar", cat: "Protein Hewani", nutrient: "Protein", icon: "🐟", kcal: 128 },
+            { id: 35, name: "Ikan Gurami Kukus", cat: "Protein Hewani", nutrient: "Protein", icon: "🐟", kcal: 115 },
+            { id: 36, name: "Ikan Kembung Bakar", cat: "Protein Hewani", nutrient: "Protein", icon: "🐟", kcal: 167 },
+            { id: 37, name: "Ikan Tongkol Balado", cat: "Protein Hewani", nutrient: "Protein", icon: "🐟", kcal: 180 },
+            { id: 38, name: "Ikan Tuna", cat: "Protein Hewani", nutrient: "Protein", icon: "🐟", kcal: 130 },
+            { id: 39, name: "Ikan Bandeng", cat: "Protein Hewani", nutrient: "Protein", icon: "🐟", kcal: 148 },
+            { id: 40, name: "Ikan Patin", cat: "Protein Hewani", nutrient: "Protein", icon: "🐟", kcal: 132 },
+            { id: 41, name: "Ikan Sarden", cat: "Protein Hewani", nutrient: "Protein", icon: "🐟", kcal: 208 },
+            { id: 42, name: "Udang Rebus", cat: "Protein Hewani", nutrient: "Protein", icon: "🦐", kcal: 99 },
+            { id: 43, name: "Cumi-cumi Kukus", cat: "Protein Hewani", nutrient: "Protein", icon: "🦑", kcal: 92 },
+            { id: 44, name: "Kerang Rebus", cat: "Protein Hewani", nutrient: "Protein", icon: "🦪", kcal: 86 },
+            { id: 45, name: "Hati Ayam Rebus", cat: "Protein Hewani", nutrient: "Protein", icon: "🥩", kcal: 116 },
+
+            // Protein Nabati (Protein dominant)
+            { id: 46, name: "Tempe Goreng", cat: "Protein Nabati", nutrient: "Protein", icon: "🟫", kcal: 118 },
+            { id: 47, name: "Tempe Bacem", cat: "Protein Nabati", nutrient: "Protein", icon: "🟫", kcal: 120 },
+            { id: 48, name: "Tempe Kukus", cat: "Protein Nabati", nutrient: "Protein", icon: "🟫", kcal: 90 },
+            { id: 49, name: "Tempe Orek", cat: "Protein Nabati", nutrient: "Protein", icon: "🟫", kcal: 140 },
+            { id: 50, name: "Tahu Putih Kukus", cat: "Protein Nabati", nutrient: "Protein", icon: "⬜", kcal: 76 },
+            { id: 51, name: "Tahu Goreng", cat: "Protein Nabati", nutrient: "Protein", icon: "⬜", kcal: 105 },
+            { id: 52, name: "Tahu Bacem", cat: "Protein Nabati", nutrient: "Protein", icon: "⬜", kcal: 110 },
+            { id: 53, name: "Tahu Isi", cat: "Protein Nabati", nutrient: "Protein", icon: "⬜", kcal: 135 },
+            { id: 54, name: "Tahu Telur", cat: "Protein Nabati", nutrient: "Protein", icon: "🍳", kcal: 150 },
+            { id: 55, name: "Oncom Goreng", cat: "Protein Nabati", nutrient: "Protein", icon: "🟫", kcal: 125 },
+            { id: 56, name: "Kacang Merah Rebus", cat: "Protein Nabati", nutrient: "Protein", icon: "🫘", kcal: 127 },
+            { id: 57, name: "Kacang Hijau Rebus", cat: "Protein Nabati", nutrient: "Protein", icon: "🫘", kcal: 105 },
+            { id: 58, name: "Kacang Kedelai Rebus", cat: "Protein Nabati", nutrient: "Protein", icon: "🫘", kcal: 173 },
+            { id: 59, name: "Edamame Rebus", cat: "Protein Nabati", nutrient: "Protein", icon: "🫛", kcal: 122 },
+            { id: 60, name: "Kacang Tanah Sangrai", cat: "Protein Nabati", nutrient: "Protein", icon: "🥜", kcal: 160 },
+            { id: 61, name: "Kacang Polong", cat: "Protein Nabati", nutrient: "Protein", icon: "🫛", kcal: 81 },
+
+            // Sayuran (Vitamin & Mineral dominant)
+            { id: 62, name: "Bayam Rebus", cat: "Sayuran", nutrient: "Vitamin", icon: "🥬", kcal: 23 },
+            { id: 63, name: "Kangkung Tumis", cat: "Sayuran", nutrient: "Vitamin", icon: "🥬", kcal: 45 },
+            { id: 64, name: "Sawi Hijau", cat: "Sayuran", nutrient: "Vitamin", icon: "🥬", kcal: 15 },
+            { id: 65, name: "Sawi Putih", cat: "Sayuran", nutrient: "Vitamin", icon: "🥬", kcal: 13 },
+            { id: 66, name: "Pakcoy Kukus", cat: "Sayuran", nutrient: "Vitamin", icon: "🥬", kcal: 14 },
+            { id: 67, name: "Brokoli Rebus", cat: "Sayuran", nutrient: "Vitamin", icon: "🥦", kcal: 35 },
+            { id: 68, name: "Kembang Kol", cat: "Sayuran", nutrient: "Vitamin", icon: "🥦", kcal: 25 },
+            { id: 69, name: "Wortel Rebus", cat: "Sayuran", nutrient: "Vitamin", icon: "🥕", kcal: 35 },
+            { id: 70, name: "Buncis Rebus", cat: "Sayuran", nutrient: "Vitamin", icon: "🫛", kcal: 31 },
+            { id: 71, name: "Kacang Panjang", cat: "Sayuran", nutrient: "Vitamin", icon: "🫛", kcal: 47 },
+            { id: 72, name: "Labu Siam Rebus", cat: "Sayuran", nutrient: "Mineral", icon: "🍈", kcal: 19 },
+            { id: 73, name: "Labu Kuning", cat: "Sayuran", nutrient: "Vitamin", icon: "🎃", kcal: 26 },
+            { id: 74, name: "Terong Tumis", cat: "Sayuran", nutrient: "Vitamin", icon: "🍆", kcal: 35 },
+            { id: 75, name: "Oyong Sup", cat: "Sayuran", nutrient: "Air", icon: "🥒", kcal: 20 },
+            { id: 76, name: "Jagung Muda (Putren)", cat: "Sayuran", nutrient: "Vitamin", icon: "🌽", kcal: 30 },
+            { id: 77, name: "Kol Rebus", cat: "Sayuran", nutrient: "Vitamin", icon: "🥬", kcal: 22 },
+            { id: 78, name: "Selada Segar", cat: "Sayuran", nutrient: "Air", icon: "🥗", kcal: 15 },
+            { id: 79, name: "Timun Segar", cat: "Sayuran", nutrient: "Air", icon: "🥒", kcal: 12 },
+            { id: 80, name: "Tomat Segar", cat: "Sayuran", nutrient: "Vitamin", icon: "🍅", kcal: 18 },
+            { id: 81, name: "Daun Singkong Rebus", cat: "Sayuran", nutrient: "Vitamin", icon: "🍃", kcal: 50 },
+            { id: 82, name: "Daun Pepaya", cat: "Sayuran", nutrient: "Vitamin", icon: "🍃", kcal: 45 },
+            { id: 83, name: "Tauge Rebus", cat: "Sayuran", nutrient: "Vitamin", icon: "🌱", kcal: 30 },
+            { id: 84, name: "Jamur Tiram Tumis", cat: "Sayuran", nutrient: "Mineral", icon: "🍄", kcal: 35 },
+
+            // Buah-buahan (Vitamin & Air dominant)
+            { id: 85, name: "Pisang Ambon", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🍌", kcal: 89 },
+            { id: 86, name: "Jeruk Manis", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🍊", kcal: 47 },
+            { id: 87, name: "Apel Potong", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🍎", kcal: 52 },
+            { id: 88, name: "Pir Segar", cat: "Buah-buahan", nutrient: "Air", icon: "🍐", kcal: 57 },
+            { id: 89, name: "Pepaya Potong", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🥭", kcal: 43 },
+            { id: 90, name: "Semangka Potong", cat: "Buah-buahan", nutrient: "Air", icon: "🍉", kcal: 30 },
+            { id: 91, name: "Melon Potong", cat: "Buah-buahan", nutrient: "Air", icon: "🍈", kcal: 34 },
+            { id: 92, name: "Mangga Harum Manis", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🥭", kcal: 60 },
+            { id: 93, name: "Jambu Biji", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🍈", kcal: 68 },
+            { id: 94, name: "Nanas Segar", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🍍", kcal: 50 },
+            { id: 95, name: "Anggur Segar", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🍇", kcal: 69 },
+            { id: 96, name: "Stroberi Segar", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🍓", kcal: 32 },
+            { id: 97, name: "Alpukat Segar", cat: "Buah-buahan", nutrient: "Lemak", icon: "🥑", kcal: 160 },
+            { id: 98, name: "Buah Naga", cat: "Buah-buahan", nutrient: "Air", icon: "🐉", kcal: 50 },
+            { id: 99, name: "Salak Segar", cat: "Buah-buahan", nutrient: "Vitamin", icon: "🌰", kcal: 82 },
+
+            // Minuman & Sumber Lemak
+            { id: 100, name: "Air Putih", cat: "Minuman", nutrient: "Air", icon: "🥛", kcal: 0 },
+            { id: 101, name: "Susu UHT Plain", cat: "Minuman", nutrient: "Mineral", icon: "🥛", kcal: 120 },
+            { id: 102, name: "Susu Kedelai", cat: "Minuman", nutrient: "Protein", icon: "🥛", kcal: 90 },
+            { id: 103, name: "Yoghurt Plain", cat: "Minuman", nutrient: "Mineral", icon: "🍦", kcal: 100 },
+
+            // Olahan Khas Indonesia
+            { id: 104, name: "Pepes Ikan", cat: "Olahan Khas Indonesia", nutrient: "Protein", icon: "🐟", kcal: 150 },
+            { id: 105, name: "Pepes Tahu", cat: "Olahan Khas Indonesia", nutrient: "Protein", icon: "🟫", kcal: 110 },
+            { id: 106, name: "Perkedel Kentang", cat: "Olahan Khas Indonesia", nutrient: "Karbohidrat", icon: "🥔", kcal: 140 },
+            { id: 107, name: "Sup Ayam Sayur", cat: "Olahan Khas Indonesia", nutrient: "Protein", icon: "🍲", kcal: 130 },
+            { id: 108, name: "Soto Ayam Bening", cat: "Olahan Khas Indonesia", nutrient: "Protein", icon: "🍲", kcal: 145 },
+            { id: 109, name: "Sayur Lodeh", cat: "Olahan Khas Indonesia", nutrient: "Vitamin", icon: "🍲", kcal: 120 },
+            { id: 110, name: "Gado-gado", cat: "Olahan Khas Indonesia", nutrient: "Vitamin", icon: "🥗", kcal: 220 },
+            { id: 111, name: "Capcay Sayur", cat: "Olahan Khas Indonesia", nutrient: "Vitamin", icon: "🥗", kcal: 110 }
+        ];
+
+        // Mapped items in Misi 3 (Array of item IDs)
+        let mappedFoodIds = [];
+        let currentInvestigationFood = null;
+        let activeCategoryFilter = "all";
+
+        // Misi 4 Selected Menu Items
+        // Schema: { id, foodId, name, portion: '100g', carb: 0, prot: 0, fat: 0, kcal: 0, plateCategory: 'Makanan Pokok'|'Lauk Pauk'|'Sayuran'|'Buah-buahan'|null }
+        let selectedMisi4Menu = [];
+
+        // File Upload metadata
+        let uploadedFileName = "";
+
+        // =========================================================================
+        // 2. INITIALIZATION & NAVIGATION FUNCTIONS
+        // =========================================================================
+        window.onload = function() {
+            renderMisi3FoodGrid();
+            populateMisi4SelectOptions();
+            updateNavigationUI();
+        };
+
+        function goToPage(pageNum) {
+            if (pageNum < 1 || pageNum > totalPages) return;
+
+            // Page validation rule for Page 5 (Misi 3): Must have mapped at least 1 item correctly before advancing to Page 6
+            if (currentPage === 5 && pageNum > 5) {
+                if (mappedFoodIds.length < 1) {
+                    alert("⚠️ Misi 3 Belum Selesai!\nKamu harus berhasil memetakan minimal 1 bahan makanan dengan benar sebelum melanjutkan.");
+                    return;
+                }
+            }
+
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
+
+            // Show current page
+            const targetSec = document.getElementById(`page-${pageNum}`);
+            if (targetSec) {
+                targetSec.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            currentPage = pageNum;
+            updateNavigationUI();
+            stopSpeech(); // Stop TTS when changing page
+        }
+
+        function navigateNext() {
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        }
+
+        function navigatePrev() {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        }
+
+        function updateNavigationUI() {
+            // Update progress bar
+            const percent = (currentPage / totalPages) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+
+            // Update footer indicator
+            document.getElementById('page-indicator').innerText = `Halaman ${currentPage} dari ${totalPages}`;
+
+            // Handle Back Button
+            const btnBack = document.getElementById('btn-back');
+            if (currentPage === 1) {
+                btnBack.disabled = true;
+            } else {
+                btnBack.disabled = false;
+            }
+
+            // Handle Next Button
+            const btnNext = document.getElementById('btn-next');
+            if (currentPage === totalPages) {
+                btnNext.classList.add('hidden');
+            } else {
+                btnNext.classList.remove('hidden');
+                // Validation state for page 5
+                if (currentPage === 5 && mappedFoodIds.length < 1) {
+                    btnNext.title = "Petakan minimal 1 bahan makanan terlebih dahulu";
+                } else {
+                    btnNext.title = "";
+                }
+            }
+        }
+
+        // =========================================================================
+        // 3. ACCESSIBILITY TOOLBAR FUNCTIONS
+        // =========================================================================
+        function changeFontSize(delta) {
+            currentFontSize += delta * 2;
+            if (currentFontSize < 12) currentFontSize = 12;
+            if (currentFontSize > 24) currentFontSize = 24;
+            document.documentElement.style.setProperty('--base-font-size', `${currentFontSize}px`);
+        }
+
+        function resetFontSize() {
+            currentFontSize = 16;
+            document.documentElement.style.setProperty('--base-font-size', '16px');
+        }
+
+        function speakPageText() {
+            if (!('speechSynthesis' in window)) {
+                alert("Browser Anda tidak mendukung fitur Text-to-Speech.");
+                return;
+            }
+
+            window.speechSynthesis.cancel(); // Reset previous speech
+            const activePage = document.getElementById(`page-${currentPage}`);
+            if (!activePage) return;
+
+            // Extract visible text content
+            const textToRead = activePage.innerText.replace(/\s+/g, ' ').trim();
+            currentSpeech = new SpeechSynthesisUtterance(textToRead);
+            currentSpeech.lang = 'id-ID';
+            currentSpeech.rate = 0.95;
+
+            window.speechSynthesis.speak(currentSpeech);
+        }
+
+        function pauseSpeech() {
+            if (window.speechSynthesis) window.speechSynthesis.pause();
+        }
+
+        function stopSpeech() {
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+        }
+
+        // =========================================================================
+        // 4. MISI 1 LOGIC
+        // =========================================================================
+        function calculateMisi1Total() {
+            const nasi = parseFloat(document.getElementById('m1-kcal-nasi').value) || 0;
+            const lele = parseFloat(document.getElementById('m1-kcal-lele').value) || 0;
+            const krupuk = parseFloat(document.getElementById('m1-kcal-krupuk').value) || 0;
+            const total = nasi + lele + krupuk;
+            document.getElementById('m1-total-kcal').innerText = total;
+        }
+
+        // =========================================================================
+        // 5. MISI 2 LOGIC
+        // =========================================================================
+        function toggleMsdTable() {
+            const container = document.getElementById('msd-table-container');
+            const txt = document.getElementById('msd-toggle-text');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                txt.innerText = "Tutup Tabel Acuan";
+            } else {
+                container.classList.add('hidden');
+                txt.innerText = "Buka Tabel Acuan";
+            }
+        }
+
+        function updateMisi2Calculations() {
+            const minDaily = parseFloat(document.getElementById('m2-daily-min').value) || 0;
+            const maxDaily = parseFloat(document.getElementById('m2-daily-max').value) || 0;
+
+            const targetMin = Math.round(minDaily * 0.3);
+            const targetMax = Math.round(maxDaily * 0.3);
+
+            document.getElementById('m2-target-min').innerText = targetMin;
+            document.getElementById('m2-target-max').innerText = targetMax;
+
+            // Also update Misi 4 target label
+            const m4Display = document.getElementById('m4-target-display');
+            if (m4Display) {
+                m4Display.innerText = `${targetMin} - ${targetMax}`;
+            }
+        }
+
+        // =========================================================================
+        // 6. MISI 3: FOOD BANK HUNTING LOGIC
+        // =========================================================================
+        function setFoodCategory(cat) {
+            activeCategoryFilter = cat;
+            document.querySelectorAll('#m3-category-chips .chip-btn').forEach(btn => {
+                btn.classList.remove('bg-sage-500', 'text-white');
+                btn.classList.add('bg-sage-50', 'text-sage-700');
+            });
+            event.target.classList.remove('bg-sage-50', 'text-sage-700');
+            event.target.classList.add('bg-sage-500', 'text-white');
+            renderMisi3FoodGrid();
+        }
+
+        function filterFoodBank() {
+            renderMisi3FoodGrid();
+        }
+
+        function renderMisi3FoodGrid() {
+            const grid = document.getElementById('m3-food-grid');
+            const searchKeyword = document.getElementById('m3-search-input').value.toLowerCase().trim();
+
+            grid.innerHTML = '';
+
+            const filtered = foodDatabase.filter(food => {
+                const matchesCat = (activeCategoryFilter === 'all') || (food.cat === activeCategoryFilter);
+                const matchesSearch = food.name.toLowerCase().includes(searchKeyword);
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-6 text-xs text-sage-400">Bahan makanan "${searchKeyword}" tidak ditemukan. Coba gunakan kata kunci lain.</div>`;
+                return;
+            }
+
+            filtered.forEach(food => {
+                const isMapped = mappedFoodIds.includes(food.id);
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-2xl border text-left cursor-pointer transition-all ${isMapped ? 'bg-sage-100/70 border-sage-300' : 'bg-cream-50 border-sage-200 hover:border-sage-500'}`;
+                card.onclick = () => openInvestigationCard(food);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl">${food.icon}</span>
+                        ${isMapped ? '<i class="fa-solid fa-circle-check text-sage-600 text-sm"></i>' : ''}
+                    </div>
+                    <p class="font-bold text-xs text-sage-800 mt-2 truncate">${food.name}</p>
+                    <span class="text-[9px] text-sage-500 block truncate">${food.cat}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openInvestigationCard(food) {
+            currentInvestigationFood = food;
+            const card = document.getElementById('m3-investigation-card');
+            document.getElementById('m3-card-icon').innerText = food.icon;
+            document.getElementById('m3-card-title').innerText = food.name;
+            document.getElementById('m3-card-cat').innerText = food.cat;
+            
+            const fbBox = document.getElementById('m3-feedback-box');
+            fbBox.className = 'hidden p-3 rounded-xl text-xs font-semibold';
+            
+            card.classList.remove('hidden');
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function closeInvestigationCard() {
+            document.getElementById('m3-investigation-card').classList.add('hidden');
+            currentInvestigationFood = null;
+        }
+
+        function checkNutrientAnswer(selectedNutrient) {
+            if (!currentInvestigationFood) return;
+            const fbBox = document.getElementById('m3-feedback-box');
+            const correctNutrient = currentInvestigationFood.nutrient;
+
+            fbBox.classList.remove('hidden');
+
+            if (selectedNutrient === correctNutrient) {
+                fbBox.className = 'p-3 rounded-xl text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300';
+                fbBox.innerHTML = `
+                    <i class="fa-solid fa-circle-check mr-1"></i> <strong>Tepat Sekali!</strong> 
+                    Zat gizi dominan dari ${currentInvestigationFood.name} adalah <strong>${correctNutrient}</strong>. 
+                    Bahan ini kini ditambahkan ke peta bahan makanan kelompokmu!
+                `;
+                
+                if (!mappedFoodIds.includes(currentInvestigationFood.id)) {
+                    mappedFoodIds.push(currentInvestigationFood.id);
+                    renderMappedFoodsList();
+                    renderMisi3FoodGrid();
+                    updateNavigationUI();
+                }
+            } else {
+                fbBox.className = 'p-3 rounded-xl text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300';
+                fbBox.innerHTML = `
+                    <i class="fa-solid fa-circle-xmark mr-1"></i> <strong>Belum Tepat!</strong> 
+                    ${currentInvestigationFood.name} lebih dominan mengandung <strong>${correctNutrient}</strong> (meskipun dapat mengandung sedikit gizi lain). Coba lagi!
+                `;
+            }
+        }
+
+        function renderMappedFoodsList() {
+            const container = document.getElementById('m3-mapped-list');
+            document.getElementById('m3-mapped-count').innerText = mappedFoodIds.length;
+
+            if (mappedFoodIds.length === 0) {
+                container.innerHTML = `<p class="text-xs text-sage-400 italic">Belum ada bahan yang dipetakan. Pilih bahan makanan di atas!</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            mappedFoodIds.forEach(id => {
+                const food = foodDatabase.find(f => f.id === id);
+                if (!food) return;
+
+                const badge = document.createElement('div');
+                badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl border border-sage-200 text-xs font-bold text-sage-800 shadow-xs';
+                badge.innerHTML = `
+                    <span>${food.icon} ${food.name} (${food.nutrient})</span>
+                    <button onclick="removeMappedFood(${food.id})" title="Hapus Pemetaan" class="text-rose-400 hover:text-rose-600 ml-1"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                container.appendChild(badge);
+            });
+        }
+
+        function removeMappedFood(id) {
+            mappedFoodIds = mappedFoodIds.filter(fId => fId !== id);
+            renderMappedFoodsList();
+            renderMisi3FoodGrid();
+            updateNavigationUI();
+        }
+
+        // =========================================================================
+        // 7. MISI 4: MENU PLANNING & ISI PIRINGKU
+        // =========================================================================
+        function populateMisi4SelectOptions() {
+            const select = document.getElementById('m4-food-select');
+            select.innerHTML = '<option value="">-- Pilih Bahan Makanan dari Katalog (100+) --</option>';
+
+            foodDatabase.forEach(food => {
+                const isMappedInMisi3 = mappedFoodIds.includes(food.id);
+                const opt = document.createElement('option');
+                opt.value = food.id;
+                opt.innerText = `${isMappedInMisi3 ? '⭐ ' : ''}${food.name} (${food.cat})`;
+                select.appendChild(opt);
+            });
+        }
+
+        function addSelectedFoodToMisi4() {
+            const select = document.getElementById('m4-food-select');
+            const foodId = parseInt(select.value);
+            if (!foodId) return;
+
+            const food = foodDatabase.find(f => f.id === foodId);
+            if (!food) return;
+
+            // Check if already added
+            const exists = selectedMisi4Menu.find(item => item.foodId === foodId);
+            if (exists) {
+                alert("Bahan makanan ini sudah ada dalam tabel menu!");
+                return;
+            }
+
+            // Determine default Isi Piringku mapping from category
+            let defaultPlateCategory = 'Makanan Pokok';
+            if (food.cat.includes('Hewani') || food.cat.includes('Nabati')) defaultPlateCategory = 'Lauk Pauk';
+            if (food.cat === 'Sayuran') defaultPlateCategory = 'Sayuran';
+            if (food.cat === 'Buah-buahan') defaultPlateCategory = 'Buah-buahan';
+
+            selectedMisi4Menu.push({
+                id: Date.now(),
+                foodId: food.id,
+                name: food.name,
+                icon: food.icon,
+                portion: '100 g',
+                carb: 0,
+                prot: 0,
+                fat: 0,
+                kcal: food.kcal || 0,
+                plateCategory: null // unplaced initially for drag & drop
+            });
+
+            renderMisi4MenuTable();
+            renderMisi4PlateVisualizer();
+        }
+
+        function renderMisi4MenuTable() {
+            const tbody = document.getElementById('m4-menu-table-body');
+            tbody.innerHTML = '';
+
+            if (selectedMisi4Menu.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-sage-400 italic">Belum ada bahan dipilih. Tambahkan bahan dari menu di atas!</td></tr>`;
+                calculateMisi4Totals();
+                return;
+            }
+
+            selectedMisi4Menu.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-sage-800">${item.icon} ${item.name}</td>
+                    <td class="p-3"><input type="text" value="${item.portion}" onchange="updateMisi4Item(${index}, 'portion', this.value)" class="w-20 p-1 border border-sage-200 rounded text-xs"></td>
+                    <td class="p-3"><input type="number" value="${item.carb}" oninput="updateMisi4Item(${index}, 'carb', this.value)" class="w-14 p-1 border border-sage-200 rounded text-xs"></td>
+                    <td class="p-3"><input type="number" value="${item.prot}" oninput="updateMisi4Item(${index}, 'prot', this.value)" class="w-14 p-1 border border-sage-200 rounded text-xs"></td>
+                    <td class="p-3"><input type="number" value="${item.fat}" oninput="updateMisi4Item(${index}, 'fat', this.value)" class="w-14 p-1 border border-sage-200 rounded text-xs"></td>
+                    <td class="p-3"><input type="number" value="${item.kcal}" oninput="updateMisi4Item(${index}, 'kcal', this.value)" class="w-16 p-1 border border-sage-200 rounded text-xs font-bold"></td>
+                    <td class="p-3 text-center">
+                        <button onclick="removeMisi4Item(${index})" title="Hapus Item" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            calculateMisi4Totals();
+        }
+
+        function updateMisi4Item(index, field, val) {
+            if (field === 'portion') selectedMisi4Menu[index].portion = val;
+            else selectedMisi4Menu[index][field] = parseFloat(val) || 0;
+            calculateMisi4Totals();
+        }
+
+        function removeMisi4Item(index) {
+            selectedMisi4Menu.splice(index, 1);
+            renderMisi4MenuTable();
+            renderMisi4PlateVisualizer();
+        }
+
+        function calculateMisi4Totals() {
+            let totalKcal = 0;
+            selectedMisi4Menu.forEach(item => {
+                totalKcal += item.kcal;
+            });
+
+            document.getElementById('m4-total-energy').innerText = totalKcal;
+
+            // Evaluate comparison with Misi 2 target
+            const targetMin = parseFloat(document.getElementById('m2-target-min').innerText) || 0;
+            const targetMax = parseFloat(document.getElementById('m2-target-max').innerText) || 0;
+            const statusBox = document.getElementById('m4-energy-status-box');
+
+            if (targetMin === 0 || targetMax === 0) {
+                statusBox.className = 'p-3 rounded-xl text-xs font-semibold bg-cream-100 text-sage-700';
+                statusBox.innerHTML = `<i class="fa-solid fa-circle-info mr-1"></i> Lengkapi Misi 2 untuk melihat kesesuaian rentang target kalori.`;
+                return;
+            }
+
+            if (totalKcal >= targetMin && totalKcal <= targetMax) {
+                statusBox.className = 'p-3 rounded-xl text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300';
+                statusBox.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> <strong>Sesuai!</strong> Total energi menu (${totalKcal} kkal) berada dalam rentang target makan siang (${targetMin} - ${targetMax} kkal).`;
+            } else if (totalKcal < targetMin) {
+                statusBox.className = 'p-3 rounded-xl text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300';
+                statusBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> <strong>Kurang!</strong> Total energi menu (${totalKcal} kkal) masih di bawah target minimal (${targetMin} kkal). Tambahkan bahan/porsi!`;
+            } else {
+                statusBox.className = 'p-3 rounded-xl text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300';
+                statusBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> <strong>Berlebihan!</strong> Total energi menu (${totalKcal} kkal) melebihi batas maksimal (${targetMax} kkal). Kurangi porsi atau ganti bahan!`;
+            }
+        }
+
+        // Drag and Drop & Touch Plate Placement
+        function renderMisi4PlateVisualizer() {
+            const unplacedContainer = document.getElementById('m4-unplaced-items');
+            unplacedContainer.innerHTML = '';
+
+            // Clear visual plate items
+            document.querySelectorAll('.plate-items').forEach(el => el.innerHTML = '');
+
+            if (selectedMisi4Menu.length === 0) {
+                unplacedContainer.innerHTML = `<p class="text-xs text-sage-400 italic">Tambahkan bahan menu pada tabel di atas terlebih dahulu.</p>`;
+                return;
+            }
+
+            selectedMisi4Menu.forEach((item, index) => {
+                if (!item.plateCategory) {
+                    // Item is unplaced
+                    const chip = document.createElement('div');
+                    chip.className = 'p-2 bg-white rounded-xl border border-sage-200 text-xs font-semibold text-sage-800 flex items-center justify-between cursor-grab shadow-xs';
+                    chip.draggable = true;
+                    chip.ondragstart = (e) => e.dataTransfer.setData('text/plain', index);
+
+                    chip.innerHTML = `
+                        <span>${item.icon} ${item.name}</span>
+                        <div class="flex gap-1">
+                            <button onclick="placeItemOnPlate(${index}, 'Makanan Pokok')" title="Ke Pokok" class="px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded text-[10px]">Pokok</button>
+                            <button onclick="placeItemOnPlate(${index}, 'Lauk Pauk')" title="Ke Lauk" class="px-1.5 py-0.5 bg-rose-100 text-rose-800 rounded text-[10px]">Lauk</button>
+                            <button onclick="placeItemOnPlate(${index}, 'Sayuran')" title="Ke Sayur" class="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px]">Sayur</button>
+                            <button onclick="placeItemOnPlate(${index}, 'Buah-buahan')" title="Ke Buah" class="px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded text-[10px]">Buah</button>
+                        </div>
+                    `;
+                    unplacedContainer.appendChild(chip);
+                } else {
+                    // Item is placed on a plate quadrant
+                    const targetQuadrantId = 
+                        item.plateCategory === 'Makanan Pokok' ? 'plate-pokok' :
+                        item.plateCategory === 'Lauk Pauk' ? 'plate-lauk' :
+                        item.plateCategory === 'Sayuran' ? 'plate-sayur' : 'plate-buah';
+
+                    const quad = document.getElementById(targetQuadrantId);
+                    if (quad) {
+                        const itemsBox = quad.querySelector('.plate-items');
+                        const tag = document.createElement('span');
+                        tag.className = 'bg-white px-2 py-0.5 rounded-full border border-sage-200 font-bold shadow-xs flex items-center gap-1';
+                        tag.innerHTML = `${item.icon} ${item.name} <i onclick="unplaceItem(${index})" class="fa-solid fa-xmark text-rose-400 cursor-pointer hover:text-rose-600"></i>`;
+                        itemsBox.appendChild(tag);
+                    }
+                }
+            });
+        }
+
+        function allowDrop(ev) { ev.preventDefault(); }
+        function handleDrop(ev, plateCategory) {
+            ev.preventDefault();
+            const index = ev.dataTransfer.getData('text/plain');
+            if (index !== "") {
+                placeItemOnPlate(parseInt(index), plateCategory);
+            }
+        }
+
+        function placeItemOnPlate(index, category) {
+            if (selectedMisi4Menu[index]) {
+                selectedMisi4Menu[index].plateCategory = category;
+                renderMisi4PlateVisualizer();
+            }
+        }
+
+        function unplaceItem(index) {
+            if (selectedMisi4Menu[index]) {
+                selectedMisi4Menu[index].plateCategory = null;
+                renderMisi4PlateVisualizer();
+            }
+        }
+
+        // =========================================================================
+        // 8. MISI 5: CREATIVE SUBMISSION LOGIC
+        // =========================================================================
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('m5-file-preview');
+            if (file) {
+                uploadedFileName = file.name;
+                preview.innerHTML = `<i class="fa-solid fa-paperclip text-sage-600 mr-1"></i> File terunggah: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+            } else {
+                uploadedFileName = "";
+                preview.innerHTML = "";
+            }
+        }
+
+        // =========================================================================
+        // 9. PENUTUP, PDF GENERATION & DASHBOARD INTEGRATION
+        // =========================================================================
+        function downloadPdfAndSendToGuru() {
+            const statusMsg = document.getElementById('sync-status-msg');
+            statusMsg.classList.remove('hidden');
+            statusMsg.innerText = "⏳ Sedang memproses dokumen PDF & mengunggah ke Dashboard Guru...";
+
+            // Gather all responses into a payload
+            const payload = {
+                timestamp: new Date().toISOString(),
+                groupName: document.getElementById('input-group-name').value || "Belum diisi",
+                groupMembers: document.getElementById('input-group-members').value || "Belum diisi",
+                roles: {
+                    ahliBahan: document.getElementById('role-ahli-bahan').value || "-",
+                    analisEnergi: document.getElementById('role-analis-energi').value || "-",
+                    analisGizi: document.getElementById('role-analis-gizi').value || "-"
+                },
+                misi1: {
+                    totalKcal: document.getElementById('m1-total-kcal').innerText,
+                    analysis: document.getElementById('m1-analysis-text').value || "-"
+                },
+                misi2: {
+                    gender: document.getElementById('m2-gender').value,
+                    age: document.getElementById('m2-age').value,
+                    activity: document.getElementById('m2-activity').value,
+                    dailyRange: `${document.getElementById('m2-daily-min').value || 0} - ${document.getElementById('m2-daily-max').value || 0} kkal`,
+                    targetLunch: `${document.getElementById('m2-target-min').innerText} - ${document.getElementById('m2-target-max').innerText} kkal`,
+                    calculationSteps: document.getElementById('m2-calc-steps').value || "-"
+                },
+                misi3: {
+                    mappedItemsCount: mappedFoodIds.length,
+                    mappedFoodNames: mappedFoodIds.map(id => {
+                        const f = foodDatabase.find(item => item.id === id);
+                        return f ? f.name : '';
+                    })
+                },
+                misi4: {
+                    menuItems: selectedMisi4Menu,
+                    totalEnergyMenu: document.getElementById('m4-total-energy').innerText,
+                    evaluationQ1: document.getElementById('m4-q1').value || "-",
+                    evaluationQ2: document.getElementById('m4-q2').value || "-"
+                },
+                misi5: {
+                    creativeMedium: document.querySelector('input[name="m5-medium"]:checked')?.value || "Poster",
+                    title: document.getElementById('m5-title').value || "-",
+                    rolesDesc: document.getElementById('m5-roles-desc').value || "-",
+                    fileName: uploadedFileName || "Tidak ada file",
+                    link: document.getElementById('m5-link').value || "-"
+                },
+                reflection: {
+                    q1: document.getElementById('ref-q1').value || "-",
+                    q2: document.getElementById('ref-q2').value || "-",
+                    q3: document.getElementById('ref-q3').value || "-",
+                    feeling: document.querySelector('input[name="ref-feeling"]:checked')?.value || "Senang"
+                }
+            };
+
+            // Post to target Teacher Dashboard URL via fetch API
+            fetch("https://peserta29105-wq.github.io/dasboard-guru/dashboard_guru_integrasi_lkm_detektif_nutrisi.html", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                mode: "no-cors"
+            }).then(() => {
+                statusMsg.className = "text-xs font-bold text-emerald-700 block mt-2";
+                statusMsg.innerText = "✅ Jawaban berhasil dikirim ke Dashboard Guru! Membuka tampilan cetak PDF...";
+            }).catch(err => {
+                console.log("Sync notice:", err);
+                statusMsg.className = "text-xs font-bold text-sage-700 block mt-2";
+                statusMsg.innerText = "ℹ️ Hasil kegiatan telah disimpan di dokumen lokal. Membuka cetakan PDF...";
+            }).finally(() => {
+                // Populate print view & trigger browser window.print()
+                generatePrintableHTML(payload);
+                setTimeout(() => {
+                    window.print();
+                }, 500);
+            });
+        }
+
+        function generatePrintableHTML(data) {
+            const container = document.getElementById('print-content-body');
+            container.innerHTML = `
+                <div class="card-box p-3 border rounded mb-3">
+                    <h3 class="font-bold border-b pb-1">IDENTITAS KELOMPOK</h3>
+                    <p><strong>Nama Kelompok:</strong> ${data.groupName}</p>
+                    <p><strong>Anggota:</strong> ${data.groupMembers}</p>
+                    <p><strong>Pembagian Peran:</strong> Ahli Bahan: ${data.roles.ahliBahan} | Analis Energi: ${data.roles.analisEnergi} | Analis Gizi: ${data.roles.analisGizi}</p>
+                </div>
+
+                <div class="card-box p-3 border rounded mb-3">
+                    <h3 class="font-bold border-b pb-1">MISI 1: INVESTIGASI GIZI REMAJA</h3>
+                    <p><strong>Total Energi Menu Draf:</strong> ${data.misi1.totalKcal} kkal</p>
+                    <p><strong>Analisis Keberagaman:</strong> ${data.misi1.analysis}</p>
+                </div>
+
+                <div class="card-box p-3 border rounded mb-3">
+                    <h3 class="font-bold border-b pb-1">MISI 2: KEBUTUHAN ENERGI</h3>
+                    <p><strong>Profil:</strong> ${data.misi2.gender}, ${data.misi2.age} tahun, Aktivitas ${data.misi2.activity}</p>
+                    <p><strong>Rentang Energi Harian:</strong> ${data.misi2.dailyRange}</p>
+                    <p><strong>Target Energi Makan Siang (30%):</strong> ${data.misi2.targetLunch}</p>
+                    <p><strong>Cara Perhitungan:</strong> ${data.misi2.calculationSteps}</p>
+                </div>
+
+                <div class="card-box p-3 border rounded mb-3">
+                    <h3 class="font-bold border-b pb-1">MISI 3: BERBURU BAHAN MAKANAN</h3>
+                    <p><strong>Jumlah Bahan Dipetakan:</strong> ${data.misi3.mappedItemsCount} bahan</p>
+                    <p><strong>Daftar Bahan:</strong> ${data.misi3.mappedFoodNames.join(', ') || '-'}</p>
+                </div>
+
+                <div class="card-box p-3 border rounded mb-3">
+                    <h3 class="font-bold border-b pb-1">MISI 4: RANCANGAN MENU MBG & ISI PIRINGKU</h3>
+                    <p><strong>Total Energi Menu Rancangan:</strong> ${data.misi4.totalEnergyMenu} kkal</p>
+                    <p><strong>Keterangan Bahan & Porsi:</strong></p>
+                    <ul class="list-disc pl-5">
+                        ${data.misi4.menuItems.map(item => `<li>${item.name} (${item.portion}) - Kalori: ${item.kcal} kkal [Zona: ${item.plateCategory || 'Belum diletakkan'}]</li>`).join('')}
+                    </ul>
+                    <p class="mt-2"><strong>Evaluasi Keberagaman Nutrisi:</strong> ${data.misi4.evaluationQ1}</p>
+                    <p><strong>Evaluasi Kesesuaian Energi:</strong> ${data.misi4.evaluationQ2}</p>
+                </div>
+
+                <div class="card-box p-3 border rounded mb-3">
+                    <h3 class="font-bold border-b pb-1">MISI 5: KARYA KREATIF</h3>
+                    <p><strong>Jenis Karya:</strong> ${data.misi5.creativeMedium}</p>
+                    <p><strong>Judul Karya:</strong> ${data.misi5.title}</p>
+                    <p><strong>Pembagian Tugas:</strong> ${data.misi5.rolesDesc}</p>
+                    <p><strong>File / Tautan:</strong> ${data.misi5.fileName} (${data.misi5.link})</p>
+                </div>
+
+                <div class="card-box p-3 border rounded">
+                    <h3 class="font-bold border-b pb-1">REFLEKSI PEMBELAJARAN</h3>
+                    <p><strong>Pengetahuan Baru:</strong> ${data.reflection.q1}</p>
+                    <p><strong>Pilihan Makanan Sehari-hari:</strong> ${data.reflection.q2}</p>
+                    <p><strong>Kontribusi Tim:</strong> ${data.reflection.q3}</p>
+                    <p><strong>Perasaan Pembelajaran:</strong> ${data.reflection.feeling}</p>
+                </div>
+            `;
+        }
+
+        function resetAllActivity() {
+            if (confirm("Apakah kamu yakin ingin mengulang seluruh kegiatan dari awal? Seluruh jawaban sesi ini akan direset.")) {
+                mappedFoodIds = [];
+                selectedMisi4Menu = [];
+                uploadedFileName = "";
+                
+                // Clear inputs
+                document.querySelectorAll('input, textarea').forEach(input => {
+                    if (input.type !== 'radio' && input.type !== 'checkbox') input.value = '';
+                });
+
+                renderMappedFoodsList();
+                renderMisi3FoodGrid();
+                renderMisi4MenuTable();
+                renderMisi4PlateVisualizer();
+                
+                goToPage(1);
+            }
+        }
+    </script>
+</body>
+</html>
